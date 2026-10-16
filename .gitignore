@@ -1,0 +1,15 @@
+# Dart & Flutter
+.dart_tool/
+.packages
+build/
+pubspec.lock
+
+# IDE / Editor files
+.idea/
+*.iml
+*.iws
+.vscode/
+
+# OS generated files
+.DS_Store
+Thumbs.db
