@@ -6,6 +6,10 @@ import '05_on2_quadratic.dart' as on2;
 import '06_o2n_exponential.dart' as o2n;
 import '07_onfactorial_factorial.dart' as onfactorial;
 import '08_space_complexity.dart' as space;
+import '09_dart_collections_complexity.dart' as collections;
+import '10_string_concatenation_complexity.dart' as string_concat;
+import '11_multiple_variables_big_o.dart' as multi_vars;
+import '12_big_theta_and_omega.dart' as theta_omega;
 
 void main() {
   print('=== 1. Big O(1) Constant Time ===');
@@ -31,4 +35,16 @@ void main() {
 
   print('\n=== 8. Space Complexity ===');
   space.main();
+
+  print('\n=== 9. Dart Collections Complexity ===');
+  collections.main();
+
+  print('\n=== 10. String Concatenation Complexity ===');
+  string_concat.main();
+
+  print('\n=== 11. Multiple Variable Big O ===');
+  multi_vars.main();
+
+  print('\n=== 12. Big Theta (Θ) & Big Omega (Ω) ===');
+  theta_omega.main();
 }

@@ -1,7 +1,12 @@
-/// Big O(n) - Linear Time Complexity
-/// Execution time grows proportionally with input size (N).
+/// Big O(n) - Linear Time & Space Complexity
 ///
-/// Also demonstrates Best Case O(1) vs Worst Case O(n).
+/// TIME COMPLEXITY:
+/// - Best Case Ω(1): Target is the first item (1 step).
+/// - Worst Case O(n): Target is the last item or missing (N steps).
+///
+/// SPACE COMPLEXITY (MEMORY):
+/// - In-place fold/sum: O(1) Space (0 new lists created).
+/// - Filtering (.where().toList()): O(k) Space (creates a new list of filtered elements in Heap).
 library;
 
 void main() {
@@ -10,30 +15,33 @@ void main() {
     (i) => 'Notification #$i',
   );
 
-  // 1. Best Case O(1) vs Worst Case O(n) in Linear Search
-  // Best Case: Target is the very first element -> O(1)
-  // Worst Case: Target is the last element or missing -> O(n)
-  final String targetLast = 'Notification #99999';
-  int steps = 0;
-  bool found = false;
-
+  print('=== 1. BEST CASE Ω(1) vs WORST CASE O(n) TIME ===');
+  // Best Case Ω(1): Target is at index 0
+  int bestSteps = 0;
   for (final item in notifications) {
-    steps++;
-    if (item == targetLast) {
-      found = true;
-      break;
-    }
+    bestSteps++;
+    if (item == 'Notification #0') break;
   }
-  print(
-    'O(n) Linear Search (Worst Case): Found = $found in $steps steps out of ${notifications.length}',
-  );
+  print('• Best Case Ω(1) Search : $bestSteps step ⚡');
 
-  // 2. Filtering a list (.where / ListView search filter) -> O(n)
+  // Worst Case O(n): Target is at index N - 1
+  int worstSteps = 0;
+  for (final item in notifications) {
+    worstSteps++;
+    if (item == 'Notification #99999') break;
+  }
+  print('• Worst Case O(n) Search: $worstSteps steps 🐢');
+
+  print('\n=== 2. IN-PLACE O(1) SPACE vs FILTERED COPY O(n) SPACE ===');
   final List<int> prices = [10, 45, 120, 200, 5, 80, 300];
-  final List<int> expensivePrices = prices.where((p) => p > 50).toList();
-  print('O(n) List Filtering: $expensivePrices');
 
-  // 3. Calculating sum of items -> O(n)
+  // In-place fold: O(1) Auxiliary Space
   final double total = prices.fold(0.0, (sum, price) => sum + price);
-  print('O(n) Sum Accumulation: \$${total.toStringAsFixed(2)}');
+  print(
+      '• Accumulation Fold O(1) Space: \$${total.toStringAsFixed(2)} (0 new lists allocated) 💾');
+
+  // List filtering: O(k) Auxiliary Space where k is matching items
+  final List<int> expensivePrices = prices.where((p) => p > 50).toList();
+  print(
+      '• List Filtering O(k) Space    : $expensivePrices (Allocated ${expensivePrices.length} new items in Heap) 💾');
 }

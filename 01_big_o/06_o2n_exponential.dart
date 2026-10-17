@@ -1,41 +1,53 @@
-/// Big O(2^n) - Exponential Time Complexity
-/// Execution time doubles with every single addition to the input size N.
+/// Big O(2^n) Exponential Time vs Big O(n) Memoization (Dynamic Programming)
 ///
-/// Example: Naive Recursive Fibonacci algorithm without memoization.
+/// TIME COMPLEXITY:
+/// - Naive Recursion: O(2^n) Time (2,692,537 calls for N=30)
+/// - Memoization DP: O(n) Time (59 calls for N=30)
 ///
-/// Optimization: Using Dynamic Programming / Memoization reduces O(2^n) to O(n)!
+/// SPACE COMPLEXITY (MEMORY):
+/// - Naive Recursion: O(n) Call Stack Space (stack depth of N frames)
+/// - Memoization DP: O(n) Call Stack + O(n) Memo Map Heap Space
 library;
 
 void main() {
-  int recursiveCalls = 0;
+  final int n = 30;
 
-  // Naive Recursive Fibonacci -> O(2^n)
-  int fibonacciNaive(int n) {
-    recursiveCalls++;
-    if (n <= 1) return n;
-    return fibonacciNaive(n - 1) + fibonacciNaive(n - 2);
+  print(
+      '=== 1. THE BAD WAY: Naive Recursive Fibonacci O(2^n) Time / O(n) Stack Space ===');
+  int naiveCalls = 0;
+
+  int fibonacciNaive(int num) {
+    naiveCalls++;
+    if (num <= 1) return num;
+    return fibonacciNaive(num - 1) + fibonacciNaive(num - 2);
   }
 
-  final int n = 10;
-  final int result = fibonacciNaive(n);
-  print(
-    'O(2^n) Naive Fibonacci($n) = $result ($recursiveCalls recursive calls!)',
-  );
+  final int naiveResult = fibonacciNaive(n);
+  print('Naive Fibonacci($n) = $naiveResult');
+  print('• Time  : $naiveCalls recursive function calls O(2^n) 🐢');
+  print('• Space : O(n) Call Stack Memory depth ($n frames) 💾');
 
-  // Optimized Fibonacci using Memoization -> O(n) Time
+  print(
+      '\n=== 2. THE GOOD WAY: Memoized Fibonacci O(n) Time / O(n) Heap Space ===');
   int memoCalls = 0;
   final Map<int, int> memo = {};
 
-  int fibonacciMemo(int n) {
+  int fibonacciMemo(int num) {
     memoCalls++;
-    if (n <= 1) return n;
-    if (memo.containsKey(n)) return memo[n]!;
-    memo[n] = fibonacciMemo(n - 1) + fibonacciMemo(n - 2);
-    return memo[n]!;
+    if (num <= 1) return num;
+    if (memo.containsKey(num)) return memo[num]!;
+    memo[num] = fibonacciMemo(num - 1) + fibonacciMemo(num - 2);
+    return memo[num]!;
   }
 
   final int memoResult = fibonacciMemo(n);
+  print('Memoized Fibonacci($n) = $memoResult');
+  print('• Time  : $memoCalls function calls O(n) ⚡');
+  print('• Space : O(n) Memo Map Heap Entries + O(n) Call Stack Depth 💾');
+
+  print('\n=== 📊 THE TIME & SPACE COMPARISON ===');
   print(
-    'Optimized O(n) Memoized Fibonacci($n) = $memoResult (Only $memoCalls calls!)',
-  );
+      '• Time Advantage : Memoization is ${naiveCalls ~/ memoCalls}x Faster! ⚡');
+  print(
+      '• Space Tradeoff : Allocated a small O(n) Memo Map to eliminate 2.6M redundant calls! 💾');
 }

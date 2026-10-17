@@ -1,6 +1,19 @@
-# ⚡ Big O Notation in Dart & Flutter
+# ⚡ Big O Notation: Senior Engineer's Guide to Time & Space Complexity
 
-A clean, detailed, and comprehensive reference guide for mastering **Time & Space Complexity** in Dart and Flutter.
+An architectural reference and benchmark suite designed for **Senior Software Engineers & Flutter Technical Leads**. This module bridges fundamental Computer Science asymptotic analysis with real-world **Dart VM memory mechanics, Flutter UI frame budgets (120 FPS), and production state architectures**.
+
+---
+
+## 🏛️ Senior Architectural Overview: Why Complexity Matters in Flutter
+
+In Flutter and Dart development, algorithmic complexity directly dictates **UI Frame Rate (FPS)** and **Memory Health (RAM / Garbage Collection)**:
+
+1. **Main Isolate Frame Budget (16.6ms @ 60 FPS / 8.33ms @ 120 FPS):**
+   Flutter executes Dart code on the **Main Isolate Thread**. Any operation exceeding the 8.3ms - 16.6ms window causes **UI Frame Drops (Jank)**. Running an $O(n^2)$ loop over 50,000 items on the main isolate blocks rendering and freezes the UI.
+2. **Garbage Collection (GC) Pressure & Memory Churn:**
+   Allocating intermediate objects in $O(n)$ loops creates thousands of short-lived heap objects. This triggers frequent **Garbage Collection sweeps**, freezing animation frames.
+3. **The Time-Space Trade-off (مقايضة الوقت مقابل الذاكرة):**
+   Senior engineers consciously allocate auxiliary RAM Memory ($O(n)$ Heap Space) to buy instant $O(1)$ lookup speed, protecting the main UI thread.
 
 ---
 
@@ -11,154 +24,109 @@ A clean, detailed, and comprehensive reference guide for mastering **Time & Spac
  O(1)   <   O(log n)   <   O(n)   <   O(n log n)   <   O(n²)   <   O(2ⁿ)   <   O(n!)
 ```
 
-### ⏱️ Performance Benchmarks ($N = 1,000,000$ Items)
+### 🧪 Execution Benchmark Suite Results
 
-| Notation | Rating | Operations Needed | Approx. Time | Typical Algorithm / Operation |
-| :--- | :--- | :--- | :--- | :--- |
-| **$O(1)$** | 🟢 **Best** | 1 | ~0.000001s | Map lookup, List index access, `.length` |
-| **$O(\log n)$** | 🟢 **Excellent** | ~20 | ~0.00002s | Binary Search on sorted data |
-| **$O(n)$** | 🟡 **Good** | 1,000,000 | ~0.001s | Linear search, `.where()`, `.fold()`, `.map()` |
-| **$O(n \log n)$** | 🟠 **Fair** | ~20,000,000 | ~0.02s | Sorting algorithms (`List.sort()`) |
-| **$O(n^2)$** | 🔴 **Slow** | 1,000,000,000,000 | ~16.6 min | Nested loops, naive duplicate check |
-| **$O(2^n)$** | 💥 **Horrible** | $2^{1,000,000}$ | Billions of years | Naive recursive Fibonacci |
-| **$O(n!)$** | 💥 **Worst** | $1,000,000!$ | Billions of years | Generating all permutations |
+| Module / Topic | Scenario ($N$) | Bad Way ❌ (Slow) | Good Way ✅ (Fast) | Speedup Ratio | Memory / Heap Impact | Flutter Architectural Impact |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **$O(1)$ Constant** | Find user in $1,000,000$ items | List Loop $O(n)$: **1,000,000 steps** | Map Lookup $O(1)$: **1 step** | ⚡ **1,000,000x** | $O(n)$ Heap Space | Instant $O(1)$ State & Cache Lookups |
+| **$O(\log n)$ Logarithmic** | Search ID in $1,000,000$ sorted items | Linear Search $O(n)$: **444,445 steps** | Binary Search $O(\log n)$: **18 steps** | ⚡ **24,691x** | $O(1)$ Auxiliary Space | Instant index lookup with $0$ Extra RAM |
+| **$O(n)$ Linear** | Search & Filter $100,000$ items | Worst Case $O(n)$: **100,000 steps** | Best Case $\Omega(1)$: **1 step** | ⚡ **100,000x** | In-place vs Filter List $O(k)$ | Avoid $O(n)$ inside `ListView.builder` |
+| **$O(n \log n)$ Linearithmic** | Sort $5,000$ items | Bubble Sort $O(n^2)$: **12,497,500 ops** | `List.sort()` $O(n \log n)$: **~65,000 ops** | ⚡ **192x** | $O(\log n)$ Stack Depth | Sort feeds before widget rendering |
+| **$O(n^2)$ Quadratic** | Duplicate check in $5,000$ items | Nested Loops $O(n^2)$: **12,497,500 ops** | Set Lookup $O(n)$: **5,000 ops** | ⚡ **2,499x** | Set $O(n)$ Heap Space | Prevents main isolate UI freeze |
+| **$O(2^n)$ Exponential** | Fibonacci($30$) | Naive Recursion $O(2^n)$: **2.6M calls** | Memoization $O(n)$: **59 calls** | ⚡ **45,636x** | Memo Map $O(n)$ Heap Space | Essential for tree-like calculations |
+| **$O(n!)$ Factorial** | Permutations of $5$ items | Permutation Tree $O(n!)$: **326 calls** | Avoid $O(n!)$ for $N \ge 10$ ($3.6\text{M}$ ops) | ⚠️ **CRITICAL** | $O(n!)$ Heap Allocation | **DANGER:** Freezes app for $N \ge 10$ |
+| **Space Complexity** | Transform $1,000,000$ items | List Copies $O(n)$: **1,000,000 extra items** | In-Place $O(1)$: **0 extra items** | 💾 **100% RAM Saved** | Saves RAM Heap Churn | Prevents Out-Of-Memory (OOM) crashes |
+| **Collections** | Queue vs List (`removeFirst`) | `List.removeAt(0)` $O(n)$: **100,000 shifts** | `Queue.removeFirst()` $O(1)$: **1 step** | ⚡ **100,000x** | Both $O(n)$ Base Memory | Avoids array element shifting |
+| **Strings** | Concatenate $20,000$ words | `String +=` $O(n^2)$: **~2B char copies** | `StringBuffer` $O(n)$: **20,000 writes** | ⚡ **101,410x** | `StringBuffer` $O(n)$ RAM | Eliminates 2 Billion Heap copies |
+| **Multi-Vars** | Process $A=1000$ & $B=500$ | Nested Loops $O(A \times B)$: **500,000 steps** | Sequential Loops $O(A + B)$: **1,500 steps** | ⚡ **333x** | $O(1)$ Auxiliary Space | Correct multi-dataset processing |
+| **Asymptotics** | Bounds Analysis | $O(n)$ Upper Bound (Worst) | $\Omega(1)$ Lower / $\Theta(n)$ Tight | 📐 **Exact Bounds** | Stack / Heap Bounds | Evaluates Best vs Worst case limits |
 
 ---
 
 ## 📂 Code Files Index
 
-1. [`01_o1_constant.dart`](file:///Users/zaiddaoud/Documents/dart-algorithms-and-datastructures/01_big_o/01_o1_constant.dart) — Constant Time $O(1)$ & Amortized $O(1)$
-2. [`02_ologn_logarithmic.dart`](file:///Users/zaiddaoud/Documents/dart-algorithms-and-datastructures/01_big_o/02_ologn_logarithmic.dart) — Logarithmic Time $O(\log n)$
-3. [`03_on_linear.dart`](file:///Users/zaiddaoud/Documents/dart-algorithms-and-datastructures/01_big_o/03_on_linear.dart) — Linear Time $O(n)$ & Best vs Worst Case
-4. [`04_onlogn_linearithmic.dart`](file:///Users/zaiddaoud/Documents/dart-algorithms-and-datastructures/01_big_o/04_onlogn_linearithmic.dart) — Linearithmic Time $O(n \log n)$
-5. [`05_on2_quadratic.dart`](file:///Users/zaiddaoud/Documents/dart-algorithms-and-datastructures/01_big_o/05_on2_quadratic.dart) — Quadratic Time $O(n^2)$ & $O(n)$ Set Optimization
-6. [`06_o2n_exponential.dart`](file:///Users/zaiddaoud/Documents/dart-algorithms-and-datastructures/01_big_o/06_o2n_exponential.dart) — Exponential Time $O(2^n)$ & Memoization Optimization
-7. [`07_onfactorial_factorial.dart`](file:///Users/zaiddaoud/Documents/dart-algorithms-and-datastructures/01_big_o/07_onfactorial_factorial.dart) — Factorial Time $O(n!)$
-8. [`08_space_complexity.dart`](file:///Users/zaiddaoud/Documents/dart-algorithms-and-datastructures/01_big_o/08_space_complexity.dart) — Space Complexity (Heap, Call Stack, Grid)
-9. [`main_big_o.dart`](file:///Users/zaiddaoud/Documents/dart-algorithms-and-datastructures/01_big_o/main_big_o.dart) — Executable Suite for All Modules
+1. [`01_o1_constant.dart`](file:///Users/zaiddaoud/Documents/dart-algorithms-and-datastructures/01_big_o/01_o1_constant.dart) — Constant Time $O(1)$ vs Linear Loop $O(n)$ & Time-Space Tradeoff
+2. [`02_ologn_logarithmic.dart`](file:///Users/zaiddaoud/Documents/dart-algorithms-and-datastructures/01_big_o/02_ologn_logarithmic.dart) — Logarithmic Time $O(\log n)$ vs Linear Search $O(n)$ ($0$ Extra RAM)
+3. [`03_on_linear.dart`](file:///Users/zaiddaoud/Documents/dart-algorithms-and-datastructures/01_big_o/03_on_linear.dart) — Linear Time $O(n)$ & Best Case $\Omega(1)$ vs Worst Case $O(n)$
+4. [`04_onlogn_linearithmic.dart`](file:///Users/zaiddaoud/Documents/dart-algorithms-and-datastructures/01_big_o/04_onlogn_linearithmic.dart) — Linearithmic Time $O(n \log n)$ & $O(\log n)$ Call Stack Depth
+5. [`05_on2_quadratic.dart`](file:///Users/zaiddaoud/Documents/dart-algorithms-and-datastructures/01_big_o/05_on2_quadratic.dart) — Quadratic Time $O(n^2)$ vs $O(n)$ Set Optimization & Memory Tradeoff
+6. [`06_o2n_exponential.dart`](file:///Users/zaiddaoud/Documents/dart-algorithms-and-datastructures/01_big_o/06_o2n_exponential.dart) — Exponential Time $O(2^n)$ vs $O(n)$ Memoization & Heap Tradeoff
+7. [`07_onfactorial_factorial.dart`](file:///Users/zaiddaoud/Documents/dart-algorithms-and-datastructures/01_big_o/07_onfactorial_factorial.dart) — Factorial Time $O(n!)$ Growth Rate & Permutation RAM Usage
+8. [`08_space_complexity.dart`](file:///Users/zaiddaoud/Documents/dart-algorithms-and-datastructures/01_big_o/08_space_complexity.dart) — In-Place $O(1)$ Space vs Extra $O(n)$ Heap Allocation
+9. [`09_dart_collections_complexity.dart`](file:///Users/zaiddaoud/Documents/dart-algorithms-and-datastructures/01_big_o/09_dart_collections_complexity.dart) — Dart Collections Traps (`List` vs `Set` vs `Map` vs `Queue`)
+10. [`10_string_concatenation_complexity.dart`](file:///Users/zaiddaoud/Documents/dart-algorithms-and-datastructures/01_big_o/10_string_concatenation_complexity.dart) — `String +=` $O(n^2)$ Memory Copies vs `StringBuffer` $O(n)$
+11. [`11_multiple_variables_big_o.dart`](file:///Users/zaiddaoud/Documents/dart-algorithms-and-datastructures/01_big_o/11_multiple_variables_big_o.dart) — Independent Variables: $O(A + B)$ vs $O(A \times B)$
+12. [`12_big_theta_and_omega.dart`](file:///Users/zaiddaoud/Documents/dart-algorithms-and-datastructures/01_big_o/12_big_theta_and_omega.dart) — Asymptotic Notations: Big O ($O$), Big Omega ($\Omega$), Big Theta ($\Theta$)
+13. [`main_big_o.dart`](file:///Users/zaiddaoud/Documents/dart-algorithms-and-datastructures/01_big_o/main_big_o.dart) — Executable Suite for All 12 Modules
 
 ---
 
-## 📖 Detailed English Reference
+## 🛠️ Deep Dive into Dart VM Mechanics
 
-### 1. $O(1)$ — Constant Time
-- **Explanation:** The execution time is fixed and does not change when input size $N$ grows.
-- **Dart Operations:** Direct array indexing (`list[index]`), Map hash lookup (`map[key]`), checking `.length` or `.isEmpty`.
-- **Amortized $O(1)$:** Inserting elements via `list.add()`. Inserting is $O(1)$ on average, but occasionally triggers an $O(n)$ internal array resize when capacity is reached.
+### 1. Dynamic List Amortized $O(1)$ Insertion
+When calling `list.add(x)`:
+- Dart allocates contiguous memory slots. When full, Dart allocates a **new array with 2x capacity** and copies existing $N$ items ($O(n)$).
+- Because doubling happens infrequently at $N = 4, 8, 16, 32, 64 \dots$, the average cost per insertion over $N$ items is **Amortized $O(1)$**.
 
-### 2. $O(\log n)$ — Logarithmic Time
-- **Explanation:** The problem size is cut in half at every step.
-- **Dart Operations:** Binary Search on a sorted `List`. Searching 1,000,000 items requires at most 20 steps.
+### 2. Immutable String Concatenation Trap ($O(n^2)$)
+Dart `String` objects are **immutable**.
+- Calling `string += word` in a loop of $N$ words creates $N$ intermediate `String` objects in the Heap.
+- For 20,000 words, this allocates over **2 Billion intermediate character copies** ($O(n^2)$).
+- Using `StringBuffer` allocates a chunked memory buffer, executing in **$O(n)$ total time**.
 
-### 3. $O(n)$ — Linear Time
-- **Explanation:** Execution time increases directly in proportion to the input size $N$.
-- **Dart Operations:** Single `for` loop, filtering lists with `.where()`, aggregating values with `.fold()`, transforming elements with `.map()`.
-- **Best vs Worst Case:** Searching an element at the first index takes $O(1)$ (Best Case $\Omega$), while searching an element at the end or missing takes $O(n)$ (Worst Case $O$).
-
-### 4. $O(n \log n)$ — Linearithmic Time
-- **Explanation:** Performs a logarithmic $O(\log n)$ operation for each of the $N$ items.
-- **Dart Operations:** Efficient comparison sorting using `list.sort()` (Dart uses Dual-Pivot Quicksort / TimSort).
-
-### 5. $O(n^2)$ — Quadratic Time
-- **Explanation:** Execution time scales quadratically with $N$.
-- **Dart Operations:** Nested loops processing the same dataset (e.g. comparing all pairs).
-- **Optimization:** Refactor $O(n^2)$ nested loops to $O(n)$ linear time using a `Set` or `Map` for fast $O(1)$ lookups.
-
-### 6. $O(2^n)$ — Exponential Time
-- **Explanation:** Execution time doubles with every single item added to $N$.
-- **Dart Operations:** Naive recursive algorithms without memoization (e.g., naive recursive Fibonacci).
-- **Optimization:** Convert $O(2^n)$ recursion to $O(n)$ using **Memoization** (Dynamic Programming).
-
-### 7. $O(n!)$ — Factorial Time
-- **Explanation:** Execution time multiplies by $N$ for every new element added.
-- **Dart Operations:** Generating all possible permutations of a dataset.
-
-### 8. Space Complexity (Memory Analysis)
-- **$O(1)$ Auxiliary Space:** Modifying variables in-place without allocating extra memory.
-- **$O(n)$ Heap Space:** Creating new lists or maps proportional to input size $N$.
-- **$O(n)$ Call Stack Space:** Call frames accumulated during recursive function calls.
-- **$O(n^2)$ Space:** Allocating 2D matrices or grids of size $N \times N$.
+### 3. List Element Shifting ($O(n)$) vs Double-Ended Queue ($O(1)$)
+- `list.insert(0, item)` or `list.removeAt(0)` forces the Dart VM to shift every remaining $N-1$ pointer in contiguous memory $\rightarrow \mathbf{O(n)}$.
+- Using `Queue.removeFirst()` updates internal head/tail pointers in a ring buffer $\rightarrow \mathbf{O(1)}$.
 
 ---
 
-## 🇸🇦 الشرح التفصيلي باللغة العربية
+## 🇸🇦 الدليل المعماري التفصيلي للمهندسين المحترفين (Senior Level)
 
-### 📌 مقدمة في التعقيد الزمني والمكاني (Big O Notation)
-تُستخدم دالة **Big O** لقياس كفاءة الخوارزميات عند كِبَر حجم البيانات ($N$). وهي تقيس أداء الكود في **الحالة الأسوأ (Worst Case)** لضمان عمل التطبيق بسلاسة بدون بطء أو استهلاك زائد للذاكرة.
+### 📌 أثر التعقيد البرمجي (Big O) على أداء تطبيقات Flutter
 
----
+بصفتك **Senior Flutter Engineer / Lead Developer**، يجب أن تنظر إلى الـ Big O من منظورين حاسمين:
 
-### 1️⃣ $O(1)$ — التعقيد الثابت (Constant Time)
-* **الشرح:** يستغرق الكود نفس الوقت تماماً للعمل بغض النظر عن حجم البيانات (سواء كانت 5 عناصر أو 5,000,000 عنصر).
-* **أمثلة في Dart:**
-  - الوصول المباشر بالـ Index: `products[500000]`
-  - البحث المباشر بـ Key في الـ Map: `userCache['user_id']`
-  - قراءة الخصائص المباشرة: `list.length` أو `list.isEmpty`
-* **المفهوم المتقدم (Amortized $O(1)$):** إضافة عنصر إلى القائمة `list.add()`. الإضافة تتم في زمن ثابت $O(1)$ عادةً، وعندما تمتلئ الذاكرة المخصصة للقائمة، يقوم Dart بإعادة تجميع المصفوفة ومضاعفة حجمها $O(n)$. يسمى متوسط هذا الوقت بـ **Amortized $O(1)$**.
+#### 1️⃣ ميزانية إطار العرض (Main Isolate Thread & 120 FPS Frame Budget):
+يعمل كود Dart في تطبيق Flutter على الـ **Main Isolate Thread**.
+- لعرض **60 FPS**، يملك الكود **16.6ms** فقط لمعالجة المنطق وبناء الـ Widgets.
+- لعرض **120 FPS**، تق تقل الميزانية إلى **8.3ms**!
+- تنفيذ خوارزمية بـ $O(n^2)$ على قائمة تحتوي 50,000 عنصر داخل الـ Main Isolate يستغرق أمتاراً من الملي ثانية، مما يتسبب في **تجميد الـ UI وسقوط الإطارات (UI Jank / Frame Drops)**.
 
----
+#### 2️⃣ ضغط الذاكرة وجامع القمامة (Memory Allocation & Garbage Collection Churn):
+إنشاء كائنات مؤقتة داخل اللوبات (مثل دمج النصوص بـ `+=` أو إنشاء قوائم جديدة في كل تكرار):
+- يزيد من تخصيص الذاكرة في الـ **RAM Heap**.
+- يجبر الـ **Garbage Collector (GC)** على العمل المتكرر لإعادة تنظيف الذاكرة، مما يسبب **وقفات صغيرة مفاجئة (Stuttering)** أثناء حركة السكرول أو الأنيماشن.
 
-### 2️⃣ $O(\log n)$ — التعقيد اللوغاريتمي (Logarithmic Time)
-* **الشرح:** يتم تنصيف حجم البيانات إلى النصف في كل خطوة من خطوات الخوارزمية.
-* **أمثلة في Dart:**
-  - خوارزمية **البحث الثنائي (Binary Search)** على القوائم المرتبة.
-  - للبحث في قائمة بـ 1,000,000 عنصر، تحتاج الخوارزمية إلى **20 خطوة فقط كأقصى حد**!
+#### 3️⃣ مقايضة الوقت مقابل الذاكرة (Time-Space Trade-off):
+المهندس المحترف يضحي بحجز مساحة إضافية في الـ RAM Heap ($O(n)$ Space) لحساب جداول الـ `Map` أو الـ `Set` من أجل الحصول على زمن استجابة لحظي $O(1)$ حمايةً للـ Main Isolate.
 
 ---
 
-### 3️⃣ $O(n)$ — التعقيد الخطي (Linear Time)
-* **الشرح:** يتناسب وقت التنفيذ طردياً بنسبة $1:1$ مع حجم البيانات $N$. مضاعفة البيانات تؤدي لمضاعفة وقت التنفيذ.
-* **أمثلة في Dart:**
-  - الدوران الأحادي بـ `for` loop.
-  - فلترة القوائم بـ `.where()`.
-  - تجميع العناصر بـ `.fold()`.
-* **الحالة الأفضل والأسوأ (Best vs Worst Case):**
-  - **Best Case ($\Omega$):** إيجاد العنصر في أول القائمة يستغرق $O(1)$.
-  - **Worst Case ($O$):** إيجاد العنصر في آخر القائمة أو عدم وجوده يستغرق $O(n)$.
+### 🧪 ملخص المقارنات والتحسينات المباشرة من الأكواد:
 
----
+1. **[01_o1_constant.dart](file:///Users/zaiddaoud/Documents/dart-algorithms-and-datastructures/01_big_o/01_o1_constant.dart):**
+   - **البحث المباشر بـ Map Key ($O(1)$) مقابل الدوران ($O(n)$):** أسرع بـ **1,000,000 مرة** لمشترك من بين مليون مستخدم.
 
-### 4️⃣ $O(n \log n)$ — التعقيد الخطي اللوغاريتمي (Linearithmic Time)
-* **الشرح:** ينفذ عملية لوغاريتمية $O(\log n)$ لكل عنصر من عناصر القائمة $N$.
-* **أمثلة في Dart:**
-  - خوارزميات الترتيب الفعالة مثل `list.sort()`. يستخدم Dart خوارزميات ترتيب متقدمة مثل Dual-Pivot Quicksort / TimSort.
+2. **[02_ologn_logarithmic.dart](file:///Users/zaiddaoud/Documents/dart-algorithms-and-datastructures/01_big_o/02_ologn_logarithmic.dart):**
+   - **البحث الثنائي Binary Search ($O(\log n)$):** ينفذ في **18 خطوة فقط** مقابل **444,445 خطوة** في البحث الخطي دون استهلاك أي ذاكرة إضافية ($O(1)$ Space).
 
----
+3. **[05_on2_quadratic.dart](file:///Users/zaiddaoud/Documents/dart-algorithms-and-datastructures/01_big_o/05_on2_quadratic.dart):**
+   - **فحص التكرارات بـ Set ($O(n)$) مقابل اللوبات المتداخلة ($O(n^2)$):** أسرع بـ **2,499 مرة** لـ 5,000 عنصر (خفض العمليات من 12.5 مليون إلى 5,000 فقط).
 
-### 5️⃣ $O(n^2)$ — التعقيد التربيعي (Quadratic Time)
-* **الشرح:** يتضاعف الوقت بشكل تربيعي مع زيادة البيانات ($N \times N$).
-* **أمثلة في Dart:**
-  - اللوبات المتداخلة (Nested Loops) التي تمر على نفس المجموعة.
-* **طريقة التحسين:** يمكن تحسين الكود من $O(n^2)$ إلى $O(n)$ بأسلوب ذكي عبر استخدام `Set` أو `Map` للبحث السريع.
+4. **[06_o2n_exponential.dart](file:///Users/zaiddaoud/Documents/dart-algorithms-and-datastructures/01_big_o/06_o2n_exponential.dart):**
+   - **البرمجة الديناميكية (Memoization $O(n)$):** تختصر استدعاءات الفيبوناتشي التكرارية من **2,692,537 استدعاء إلى 59 استدعاء فقط** (أسرع بـ **45,636 مرة**!).
 
----
+5. **[09_dart_collections_complexity.dart](file:///Users/zaiddaoud/Documents/dart-algorithms-and-datastructures/01_big_o/09_dart_collections_complexity.dart):**
+   - **`Queue.removeFirst()` ($O(1)$) مقابل `List.removeAt(0)` ($O(n)$):** يتجنب عملية إزاحة 100,000 عنصر في ذاكرة الـ RAM عند الحذف من بداية القائمة.
 
-### 6️⃣ $O(2^n)$ — التعقيد الأسي (Exponential Time)
-* **الشرح:** يتضاعف الوقت بالكامل عند إضافة عنصر واحد فقط إلى $N$.
-* **أمثلة في Dart:**
-  - الدوال التكرارية المباشرة (Recursion) دون حفظ النتائج مثل (Naive Recursive Fibonacci).
-* **طريقة التحسين:** تحويل الكود إلى $O(n)$ باستخدام البرمجة الديناميكية **(Memoization)**.
-
----
-
-### 7️⃣ $O(n!)$ — التعقيد العاملي (Factorial Time)
-* **الشرح:** أبطأ أنواع التعقيد على الإطلاق. يضرب وقت التنفيذ في $N$ مع كل عنصر جديد.
-* **أمثلة في Dart:**
-  - توليد جميع التباديل والاحتمالات القائمة لقائمة من العناصر (Permutations).
-
----
-
-### 8️⃣ تعقيد الذاكرة (Space Complexity)
-* **$O(1)$ Auxiliary Space:** تعديل البيانات في مكانها (In-place) دون استهلاك ذاكرة إضافية.
-* **$O(n)$ Heap Space:** تخصيص قوائم أو مصفوفات جديدة في الذاكرة تتناسب مع $N$.
-* **$O(n)$ Call Stack Space:** الذاكرة المحجوزة في مكدس استدعاء الدوال عند استخدام Recursion.
-* **$O(n^2)$ Space:** تخصيص مصفوفات ثنائية الأبعاد (2D Grid / Matrix) بحجم $N \times N$.
+6. **[10_string_concatenation_complexity.dart](file:///Users/zaiddaoud/Documents/dart-algorithms-and-datastructures/01_big_o/10_string_concatenation_complexity.dart):**
+   - **`StringBuffer` ($O(n)$) مقابل `String +=` ($O(n^2)$):** يوفر نسخ **2 مليار حرف مكرر** في ذاكرة الـ Heap وهو أسرع بـ **101,410 مرة**!
 
 ---
 
 ## 🏃 How to Run | طريقة التشغيل
 
-لتشغيل كافة الأمثلة المجمعة:
+تشغيل كافة الأمثلة المجمعة:
 ```bash
 dart run main_big_o.dart
 ```
@@ -173,4 +141,8 @@ dart run 05_on2_quadratic.dart
 dart run 06_o2n_exponential.dart
 dart run 07_onfactorial_factorial.dart
 dart run 08_space_complexity.dart
+dart run 09_dart_collections_complexity.dart
+dart run 10_string_concatenation_complexity.dart
+dart run 11_multiple_variables_big_o.dart
+dart run 12_big_theta_and_omega.dart
 ```

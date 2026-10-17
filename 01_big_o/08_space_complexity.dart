@@ -1,47 +1,47 @@
-/// Space Complexity - Memory Allocation Analysis
-/// Measures total memory (Stack + Heap) allocated relative to input size N.
+/// Space Complexity - In-Place O(1) Memory vs Extra Allocations O(n)
 ///
-/// 1. O(1) Space: Constant auxiliary memory (In-place).
-/// 2. O(n) Space: Memory scales linearly with N (Creating new List / Set / Map).
-/// 3. O(n) Call Stack Space: Recursive call stack depth.
-/// 4. O(n^2) Space: 2D Grid / Matrix allocation.
+/// WHY WE NEED SPACE COMPLEXITY ANALYSIS:
+/// Allocating new lists or deep recursion call stacks consumes RAM Heap and Stack memory.
+/// In mobile devices (Flutter), excessive memory allocations trigger garbage collection lag
+/// or cause Out-Of-Memory (OOM) app crashes!
 library;
 
 void main() {
-  final List<int> numbers = [10, 20, 30, 40, 50];
+  final List<int> numbers = List.generate(1000000, (i) => i);
 
-  // 1. O(1) Auxiliary Space: In-place calculation (Fixed memory usage)
-  double sumInPlace(List<int> list) {
-    double total = 0; // Fixed double variable
-    for (final num in list) {
-      total += num;
-    }
-    return total;
-  }
-
-  // 2. O(n) Auxiliary Space: Creating a new list in memory
-  List<int> doubleElements(List<int> list) {
-    final List<int> result = []; // Allocates memory proportional to N
+  print('=== 1. THE BAD WAY: Creating new List O(n) Space ===');
+  // Bad Way: Allocates 1,000,000 new integers in RAM Heap memory
+  List<int> doubleElementsBad(List<int> list) {
+    final List<int> result = []; // O(n) Heap Space
     for (final num in list) {
       result.add(num * 2);
     }
     return result;
   }
 
-  // 3. O(n) Call Stack Space: Recursion call stack memory
-  int recursiveCountdown(int n) {
-    if (n <= 0) return 0;
-    return 1 +
-        recursiveCountdown(n - 1); // Each call adds a frame to call stack
+  final List<int> doubledList = doubleElementsBad(numbers);
+  print('O(n) Space: Created new list of length ${doubledList.length}');
+  print(
+      '❌ Bad Way Memory: Allocated 1,000,000 extra integer elements in RAM Heap!');
+
+  print('\n=== 2. THE GOOD WAY: In-Place Accumulation O(1) Space ===');
+  // Good Way: Accumulates sum into a single double variable without allocating new lists
+  double sumInPlace(List<int> list) {
+    double total = 0; // O(1) Fixed Memory Allocation
+    for (final num in list) {
+      total += num;
+    }
+    return total;
   }
 
-  // 4. O(n^2) Space: Creating an N x N 2D Grid
-  List<List<int>> createGrid(int n) {
-    return List.generate(n, (_) => List.generate(n, (_) => 0));
-  }
+  final double totalSum = sumInPlace(numbers);
+  print('O(1) Space: Sum = $totalSum');
+  print(
+      '✅ Good Way Memory: Allocated 0 extra list elements (Used only 1 fixed variable)!');
 
-  print('O(1) Space Sum Result: ${sumInPlace(numbers)}');
-  print('O(n) Space Doubled List: ${doubleElements(numbers)}');
-  print('O(n) Call Stack Space Recursion Depth: ${recursiveCountdown(5)}');
-  print('O(n^2) Space Grid (3x3): ${createGrid(3)}');
+  print('\n=== 📊 THE SPACE COMPLEXITY SUMMARY ===');
+  print('• O(1) In-Place Space  : Fixed memory usage regardless of N ⚡');
+  print('• O(n) Heap Memory Space : Allocates memory proportional to N 💾');
+  print('• O(n) Call Stack Space  : Frame allocation per recursion depth 🥞');
+  print('• O(n^2) Matrix Space    : Allocates N x N 2D grid elements ⏹️');
 }
